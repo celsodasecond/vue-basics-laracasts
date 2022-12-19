@@ -8,22 +8,27 @@ export default {
     },
 
     template: `
-        <section class="space-y-6">
-            <AssignmentList :assignments="filters.inProgress" title="In Progress"></AssignmentList>
-            <AssignmentList :assignments="filters.completed" title="Completed"></AssignmentList>
+        <section class="flex gap-8">
+            <AssignmentList :assignments="filters.inProgress" title="In Progress">
+                <AssignmentCreate @add="add"></AssignmentCreate>
+            </AssignmentList>
 
-            <AssignmentCreate @add="add"></AssignmentCreate>
+            <div v-show="showCompleted">
+                <AssignmentList 
+                    :assignments="filters.completed" 
+                    title="Completed" 
+                    canToggle
+                    @toggle="showCompleted = !showCompleted"
+                ></AssignmentList>
+            </div>
+            
         </section> 
     `,
 
     data() {
         return {
-            assignments: [
-                { name: 'Finish Project', complete: false, id: 1 },
-                { name: 'Read Chapter 4', complete: false, id: 2 },
-                { name: 'Turn in Homework', complete: false, id: 3 },
-            ],
-
+            assignments: [],
+            showCompleted: false
         }
     },
 
@@ -36,6 +41,14 @@ export default {
         }
     },
 
+    created() {
+        fetch('http://localhost:3001/assignments')
+            .then(response => response.json())
+            .then(assignments => {
+                this.assignments = assignments;
+            })
+    },
+
     methods: {
         add(name) {
             this.assignments.push({
@@ -43,6 +56,6 @@ export default {
                 complete: false,
                 id: this.assignments.length + 1
             })
-        }, 
+        },
     }
 }
